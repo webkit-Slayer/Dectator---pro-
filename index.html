@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Slow Dictation Tool</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #0f172a;
+    color: #e5e7eb;
+    font-family: "Segoe UI", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .app {
+    width: 900px;
+    max-width: 95%;
+    background: #020617;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  }
+
+  h2 {
+    margin-top: 0;
+    text-align: center;
+    color: #38bdf8;
+    letter-spacing: 1px;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  button {
+    background: #1e293b;
+    color: #e5e7eb;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    background: #38bdf8;
+    color: #020617;
+  }
+
+  .settings {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+
+  .settings label {
+    font-size: 13px;
+    color: #cbd5f5;
+  }
+
+  input[type="range"] {
+    width: 120px;
+    accent-color: #38bdf8;
+  }
+
+  input[type="number"] {
+    width: 70px;
+    background: #020617;
+    border: 1px solid #1e293b;
+    color: #e5e7eb;
+    padding: 4px;
+    border-radius: 6px;
+  }
+
+  #textBox {
+    margin-top: 20px;
+    background: #020617;
+    padding: 18px;
+    border-radius: 10px;
+    min-height: 180px;
+    line-height: 2;
+    font-size: 20px;
+    border: 1px solid #1e293b;
+  }
+
+  .word {
+    padding: 3px 6px;
+    border-radius: 6px;
+  }
+
+  .active {
+    background: #38bdf8;
+    color: #020617;
+    font-weight: bold;
+  }
+
+  footer {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2>📖 Slow Dictation Tool</h2>
+
+  <div class="controls">
+    <button onclick="readClipboard()">📋 Paste & Start</button>
+    <button onclick="pauseSpeech()">⏸ Pause</button>
+    <button onclick="resumeSpeech()">▶ Resume</button>
+  </div>
+
+  <div class="settings">
+    <label>
+      Speed
+      <input type="range" min="0.3" max="1" step="0.1" value="0.6" id="speed">
+    </label>
+
+    <label>
+      Gap (ms)
+      <input type="number" value="500" id="gap">
+    </label>
+  </div>
+
+  <div id="textBox">📌 Clipboard ka text yahan dikhega...</div>
+
+  <footer>
+    Designed for slow writers • Focus mode dictation
+  </footer>
+</div>
+
+<script>
+let words = [];
+let index = 0;
+let paused = false;
+
+function readClipboard() {
+  navigator.clipboard.readText().then(text => {
+    if (!text) return;
+    speechSynthesis.cancel();
+    words = text.split(" ");
+    index = 0;
+    paused = false;
+    renderText();
+    speakNext();
+  });
+}
+
+function renderText() {
+  document.getElementById("textBox").innerHTML =
+    words.map((w, i) =>
+      `<span class="word" id="w${i}">${w}</span>`
+    ).join(" ");
+}
+
+function speakNext() {
+  if (index >= words.length || paused) return;
+
+  highlight(index);
+
+  let u = new SpeechSynthesisUtterance(words[index]);
+  u.rate = document.getElementById("speed").value;
+  u.lang = "en-IN";
+
+  u.onend = () => {
+    index++;
+    setTimeout(speakNext, document.getElementById("gap").value);
+  };
+
+  speechSynthesis.speak(u);
+}
+
+function highlight(i) {
+  document.querySelectorAll(".word").forEach(w => w.classList.remove("active"));
+  document.getElementById("w" + i)?.classList.add("active");
+}
+
+function pauseSpeech() {
+  paused = true;
+  speechSynthesis.pause();
+}
+
+function resumeSpeech() {
+  if (paused) {
+    paused = false;
+    speechSynthesis.resume();
+    speakNext();
+  }
+}
+</script>
+
+</body>
+</html>
