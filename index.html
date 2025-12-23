@@ -16,16 +16,15 @@
     color: #e5e7eb;
     font-family: "Segoe UI", sans-serif;
     display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   .app {
-    width: 900px;
+    width: 200px;
     max-width: 95%;
+    height:100%;
     background: #020617;
     padding: 25px;
-    border-radius: 14px;
+    border-right:1px solid #ccc;
     box-shadow: 0 20px 40px rgba(0,0,0,0.6);
   }
 
@@ -96,6 +95,7 @@
     line-height: 2;
     font-size: 20px;
     border: 1px solid #1e293b;
+    overflow-wrap: break-word;
   }
 
   .word {
@@ -114,6 +114,11 @@
     text-align: center;
     font-size: 12px;
     color: #64748b;
+  }
+  #main{
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
   }
 </style>
 </head>
@@ -141,13 +146,16 @@
     </label>
   </div>
 
-  <div id="textBox">📌 Clipboard ka text yahan dikhega...</div>
+ 
 
   <footer>
     Designed for slow writers • Focus mode dictation
   </footer>
 </div>
-
+<section id="main">
+<div id="textBox">📌 Clipboard ka text yahan dikhega...</div>
+</section>
+ 
 <script>
 let words = [];
 let index = 0;
